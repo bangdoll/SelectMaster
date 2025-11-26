@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SelectMaster - 隨機抽籤輪盤</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&family=Outfit:wght@400;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="./style.css">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+</head>
+
+<body>
+  <div id="app">
+    <!-- 左側：輪盤區域 -->
+    <div class="wheel-section">
+      <div class="roulette-container">
+        <div class="pointer"></div>
+        <canvas id="roulette-canvas"></canvas>
+      </div>
+      <!-- 切換面板按鈕 -->
+      <button id="toggle-panel-btn" class="toggle-panel-btn" title="顯示/隱藏名單">
+        ☰
+      </button>
+    </div>
+
+    <!-- 右側：控制面板 -->
+    <div class="control-panel" id="control-panel">
+      <!-- 頂部按鈕 -->
+      <div class="panel-header">
+        <button id="spin-btn" class="action-btn primary">
+          <span>🎯</span>
+          開始轉動
+        </button>
+        <div class="header-buttons">
+          <button id="mute-btn" class="icon-btn" title="靜音">🔊</button>
+          <button id="fullscreen-btn" class="icon-btn" title="全螢幕">⛶</button>
+        </div>
+      </div>
+
+      <!-- 名單輸入區 -->
+      <div class="names-section">
+        <label for="names-input">輸入名單 (每行一個名字)</label>
+        <textarea id="names-input" placeholder="例如：&#10;小明&#10;小華&#10;小美&#10;大雄"></textarea>
+      </div>
+
+      <!-- 底部資訊 -->
+      <div class="panel-footer">
+        <div class="info-text">
+          版本 385 | SelectMaster
+        </div>
+      </div>
+    </div>
+
+    <!-- 中獎彈窗 -->
+    <div id="winner-display" class="hidden">
+      <div class="winner-overlay"></div>
+      <div class="winner-content">
+        <h2>🎉 中選者 🎉</h2>
+        <div id="winner-name"></div>
+        <div class="winner-actions">
+          <button id="remove-winner" class="secondary-btn">刪除並關閉</button>
+          <button id="close-winner" class="primary-btn">保留並關閉</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script type="module" src="/main.js"></script>
+</body>
+
+</html>
