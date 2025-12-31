@@ -36,8 +36,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // 確保 AudioContext 已啟動 (瀏覽器政策要求)
         soundManager.init();
 
-        if (roulette.items.length < 2) {
-            alert('請至少輸入兩個選項！');
+        if (roulette.items.length < 1) {
+            alert('請至少輸入一個選項！');
             return;
         }
 
@@ -165,7 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 如果點擊在中心圓內，則開始轉動
         if (distance <= centerRadius) {
-            if (!roulette.isSpinning && roulette.items.length >= 2) {
+            if (!roulette.isSpinning && roulette.items.length >= 1) {
                 spinBtn.disabled = true;
                 roulette.spin();
             }
