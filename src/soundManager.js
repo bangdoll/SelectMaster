@@ -10,7 +10,7 @@ export class SoundManager {
    */
   init() {
     if (this.initialized) return;
-    
+
     try {
       const AudioContext = window.AudioContext || window.webkitAudioContext;
       this.audioContext = new AudioContext();
@@ -42,21 +42,34 @@ export class SoundManager {
 
     const osc = this.audioContext.createOscillator();
     const gainNode = this.audioContext.createGain();
+    const filter = this.audioContext.createBiquadFilter();
 
-    osc.connect(gainNode);
+    // 建立信號鏈：振盪器 -> 濾波器 -> 增益 -> 輸出
+    osc.connect(filter);
+    filter.connect(gainNode);
     gainNode.connect(this.audioContext.destination);
 
-    // 根據速度調整頻率，產生加速/減速的聽覺效果
-    // 基礎頻率 800Hz，隨速度增加
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(800 + (speedRatio * 400), this.audioContext.currentTime);
+    // 設定濾波器模擬機械共振
+    filter.type = 'bandpass';
+    filter.frequency.value = 1000 + (speedRatio * 500); // 隨速度改變共振頻率
+    filter.Q.value = 2; // 調整共振品質因子
 
-    // 短促的聲音包絡
-    gainNode.gain.setValueAtTime(0.1, this.audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.05);
+    // 使用三角波產生較為清脆的聲音
+    osc.type = 'triangle';
+
+    // 頻率包絡：快速下降模擬撞擊聲
+    // 基礎頻率隨速度變化
+    const startFreq = 800 + (speedRatio * 800);
+    osc.frequency.setValueAtTime(startFreq, this.audioContext.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(100, this.audioContext.currentTime + 0.08);
+
+    // 音量包絡：短促有力
+    const volume = 0.15 + (speedRatio * 0.15); // 速度越快聲音越大
+    gainNode.gain.setValueAtTime(volume, this.audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.08);
 
     osc.start();
-    osc.stop(this.audioContext.currentTime + 0.05);
+    osc.stop(this.audioContext.currentTime + 0.1);
   }
 
   /**
@@ -85,7 +98,7 @@ export class SoundManager {
 
       // 稍微錯開每個音的開始時間，製造琶音效果
       const noteStart = startTime + (index * 0.05);
-      
+
       gainNode.gain.setValueAtTime(0, noteStart);
       gainNode.gain.linearRampToValueAtTime(0.2, noteStart + 0.1);
       gainNode.gain.exponentialRampToValueAtTime(0.001, noteStart + 1.5); // 餘音
