@@ -40,6 +40,7 @@ export class SoundManager {
       this.audioContext.resume();
     }
 
+    const t = this.audioContext.currentTime;
     const osc = this.audioContext.createOscillator();
     const gainNode = this.audioContext.createGain();
     const filter = this.audioContext.createBiquadFilter();
@@ -49,27 +50,30 @@ export class SoundManager {
     filter.connect(gainNode);
     gainNode.connect(this.audioContext.destination);
 
-    // 設定濾波器模擬機械共振
-    filter.type = 'bandpass';
-    filter.frequency.value = 1000 + (speedRatio * 500); // 隨速度改變共振頻率
-    filter.Q.value = 2; // 調整共振品質因子
+    // 使用方波產生更「實」的點擊感 (Wooden/Plastic click)
+    osc.type = 'square';
 
-    // 使用三角波產生較為清脆的聲音
-    osc.type = 'triangle';
+    // 濾波器模擬材質感：低通濾波，快速掃頻
+    filter.type = 'lowpass';
+    filter.Q.value = 1; // 適度共振
 
-    // 頻率包絡：快速下降模擬撞擊聲
-    // 基礎頻率隨速度變化
-    const startFreq = 800 + (speedRatio * 800);
-    osc.frequency.setValueAtTime(startFreq, this.audioContext.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(100, this.audioContext.currentTime + 0.08);
+    // 濾波器頻率包絡：從高頻快速降至低頻 (模擬撞擊瞬間的頻譜)
+    filter.frequency.setValueAtTime(1200 + (speedRatio * 800), t);
+    filter.frequency.exponentialRampToValueAtTime(200, t + 0.05);
 
-    // 音量包絡：短促有力
-    const volume = 0.15 + (speedRatio * 0.15); // 速度越快聲音越大
-    gainNode.gain.setValueAtTime(volume, this.audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.08);
+    // 振盪器頻率：固定在較低頻率，模擬物理碰撞的主體聲音
+    osc.frequency.setValueAtTime(300, t);
+    // 稍微降低音調以模擬減速時的沉重感 (可選)
+    // osc.frequency.linearRampToValueAtTime(100, t + 0.05);
 
-    osc.start();
-    osc.stop(this.audioContext.currentTime + 0.1);
+    // 音量包絡：極短促
+    // 隨速度調整音量
+    const volume = 0.1 + (speedRatio * 0.1);
+    gainNode.gain.setValueAtTime(volume, t);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, t + 0.04);
+
+    osc.start(t);
+    osc.stop(t + 0.05);
   }
 
   /**
