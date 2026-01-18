@@ -31,10 +31,10 @@ export class SoundManager {
 
   /**
    * 設定音效類型
-   * @param {string} type - 'mechanical' | 'wood' | 'coin'
+   * @param {string} type - 'mechanical' | 'wood'
    */
   setSoundType(type) {
-    if (['mechanical', 'wood', 'coin'].includes(type)) {
+    if (['mechanical', 'wood'].includes(type)) {
       this.soundType = type;
     }
   }
@@ -53,9 +53,6 @@ export class SoundManager {
     switch (this.soundType) {
       case 'wood':
         this._playWoodTick(speedRatio);
-        break;
-      case 'coin':
-        this._playCoinTick(speedRatio);
         break;
       case 'mechanical':
       default:
@@ -123,30 +120,6 @@ export class SoundManager {
 
     osc.start(t);
     osc.stop(t + 0.1);
-  }
-
-  _playCoinTick(speedRatio) {
-    const t = this.audioContext.currentTime;
-    const osc = this.audioContext.createOscillator();
-    const gainNode = this.audioContext.createGain();
-
-    osc.connect(gainNode);
-    gainNode.connect(this.audioContext.destination);
-
-    // 三角波帶有金屬質感
-    osc.type = 'triangle';
-
-    // 高頻，模擬金屬撞擊
-    const freq = 1800 + (speedRatio * 1000);
-    osc.frequency.setValueAtTime(freq, t);
-
-    // 極短促，像硬幣碰撞
-    const volume = 0.05 + (speedRatio * 0.05);
-    gainNode.gain.setValueAtTime(volume, t);
-    gainNode.gain.exponentialRampToValueAtTime(0.001, t + 0.03);
-
-    osc.start(t);
-    osc.stop(t + 0.05);
   }
 
   /**

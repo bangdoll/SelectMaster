@@ -48,14 +48,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // 監聽此音效切換按鈕
     const soundTypeBtn = document.getElementById('sound-type-btn');
     soundTypeBtn.addEventListener('click', () => {
-        // 切換音效類型 logic: mechanical -> wood -> coin -> mechanical
+        // 切換音效類型 logic: mechanical -> wood -> mechanical
         const currentType = soundManager.soundType;
         let newType;
 
         if (currentType === 'mechanical') {
             newType = 'wood';
-        } else if (currentType === 'wood') {
-            newType = 'coin';
         } else {
             newType = 'mechanical';
         }
@@ -67,14 +65,10 @@ document.addEventListener('DOMContentLoaded', () => {
             soundTypeBtn.textContent = '🎵';
             soundTypeBtn.title = '切換音效 (目前：機械聲)';
             soundTypeBtn.setAttribute('aria-label', '目前：機械聲');
-        } else if (newType === 'wood') {
+        } else {
             soundTypeBtn.textContent = '🪵';
             soundTypeBtn.title = '切換音效 (目前：木頭聲)';
             soundTypeBtn.setAttribute('aria-label', '目前：木頭聲');
-        } else {
-            soundTypeBtn.textContent = '🪙';
-            soundTypeBtn.title = '切換音效 (目前：金幣聲)';
-            soundTypeBtn.setAttribute('aria-label', '目前：金幣聲');
         }
 
         // 播放短暫測試音
