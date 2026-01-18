@@ -31,10 +31,10 @@ export class SoundManager {
 
   /**
    * 設定音效類型
-   * @param {string} type - 'mechanical' | 'card' | 'wood' | 'coin'
+   * @param {string} type - 'mechanical' | 'wood' | 'coin'
    */
   setSoundType(type) {
-    if (['mechanical', 'card', 'wood', 'coin'].includes(type)) {
+    if (['mechanical', 'wood', 'coin'].includes(type)) {
       this.soundType = type;
     }
   }
@@ -51,9 +51,6 @@ export class SoundManager {
     }
 
     switch (this.soundType) {
-      case 'card':
-        this._playCardTick(speedRatio);
-        break;
       case 'wood':
         this._playWoodTick(speedRatio);
         break;
@@ -99,37 +96,6 @@ export class SoundManager {
     const volume = 0.1 + (speedRatio * 0.1);
     gainNode.gain.setValueAtTime(volume, t);
     gainNode.gain.exponentialRampToValueAtTime(0.001, t + 0.04);
-
-    osc.start(t);
-    osc.stop(t + 0.05);
-  }
-
-  _playCardTick(speedRatio) {
-    const t = this.audioContext.currentTime;
-    const osc = this.audioContext.createOscillator();
-    const gainNode = this.audioContext.createGain();
-    const filter = this.audioContext.createBiquadFilter();
-
-    osc.connect(filter);
-    filter.connect(gainNode);
-    gainNode.connect(this.audioContext.destination);
-
-    // 鋸齒波模擬卡片/紙張的摩擦聲
-    osc.type = 'sawtooth';
-
-    // 高通濾波讓聲音更薄更脆
-    filter.type = 'highpass';
-    filter.frequency.value = 800;
-
-    // 音調較高
-    const freq = 600 + (speedRatio * 400);
-    osc.frequency.setValueAtTime(freq, t);
-    // 快速下滑模擬撥動
-    osc.frequency.exponentialRampToValueAtTime(100, t + 0.05);
-
-    const volume = 0.08 + (speedRatio * 0.05);
-    gainNode.gain.setValueAtTime(volume, t);
-    gainNode.gain.exponentialRampToValueAtTime(0.001, t + 0.03); // 非常短促
 
     osc.start(t);
     osc.stop(t + 0.05);
