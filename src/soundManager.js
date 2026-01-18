@@ -31,10 +31,10 @@ export class SoundManager {
 
   /**
    * 設定音效類型
-   * @param {string} type - 'mechanical' | 'card' | 'electronic'
+   * @param {string} type - 'mechanical' | 'card' | 'wood' | 'coin'
    */
   setSoundType(type) {
-    if (['mechanical', 'card', 'electronic'].includes(type)) {
+    if (['mechanical', 'card', 'wood', 'coin'].includes(type)) {
       this.soundType = type;
     }
   }
@@ -54,8 +54,11 @@ export class SoundManager {
       case 'card':
         this._playCardTick(speedRatio);
         break;
-      case 'electronic':
-        this._playElectronicTick(speedRatio);
+      case 'wood':
+        this._playWoodTick(speedRatio);
+        break;
+      case 'coin':
+        this._playCoinTick(speedRatio);
         break;
       case 'mechanical':
       default:
@@ -132,7 +135,7 @@ export class SoundManager {
     osc.stop(t + 0.05);
   }
 
-  _playElectronicTick(speedRatio) {
+  _playWoodTick(speedRatio) {
     const t = this.audioContext.currentTime;
     const osc = this.audioContext.createOscillator();
     const gainNode = this.audioContext.createGain();
@@ -140,19 +143,44 @@ export class SoundManager {
     osc.connect(gainNode);
     gainNode.connect(this.audioContext.destination);
 
-    // 正弦波產生純淨的電子音
+    // 正弦波模擬空心木頭聲
     osc.type = 'sine';
 
-    // 較高的電子音調
-    const freq = 1200 + (speedRatio * 800);
+    // 頻率適中，模仿木魚
+    const freq = 600 + (speedRatio * 200);
     osc.frequency.setValueAtTime(freq, t);
 
-    const volume = 0.05 + (speedRatio * 0.05);
+    // 聲音稍微圓潤一點
+    const volume = 0.15 + (speedRatio * 0.1);
     gainNode.gain.setValueAtTime(volume, t);
-    gainNode.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
 
     osc.start(t);
-    osc.stop(t + 0.06);
+    osc.stop(t + 0.1);
+  }
+
+  _playCoinTick(speedRatio) {
+    const t = this.audioContext.currentTime;
+    const osc = this.audioContext.createOscillator();
+    const gainNode = this.audioContext.createGain();
+
+    osc.connect(gainNode);
+    gainNode.connect(this.audioContext.destination);
+
+    // 三角波帶有金屬質感
+    osc.type = 'triangle';
+
+    // 高頻，模擬金屬撞擊
+    const freq = 1800 + (speedRatio * 1000);
+    osc.frequency.setValueAtTime(freq, t);
+
+    // 極短促，像硬幣碰撞
+    const volume = 0.05 + (speedRatio * 0.05);
+    gainNode.gain.setValueAtTime(volume, t);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, t + 0.03);
+
+    osc.start(t);
+    osc.stop(t + 0.05);
   }
 
   /**
