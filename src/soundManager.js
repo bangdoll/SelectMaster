@@ -31,10 +31,10 @@ export class SoundManager {
 
   /**
    * 設定音效類型
-   * @param {string} type - 'mechanical' | 'soft'
+   * @param {string} type - 'mechanical' | 'card' | 'electronic'
    */
   setSoundType(type) {
-    if (['mechanical', 'soft'].includes(type)) {
+    if (['mechanical', 'card', 'electronic'].includes(type)) {
       this.soundType = type;
     }
   }
@@ -50,10 +50,17 @@ export class SoundManager {
       this.audioContext.resume();
     }
 
-    if (this.soundType === 'mechanical') {
-      this._playMechanicalTick(speedRatio);
-    } else {
-      this._playSoftTick(speedRatio);
+    switch (this.soundType) {
+      case 'card':
+        this._playCardTick(speedRatio);
+        break;
+      case 'electronic':
+        this._playElectronicTick(speedRatio);
+        break;
+      case 'mechanical':
+      default:
+        this._playMechanicalTick(speedRatio);
+        break;
     }
   }
 
@@ -94,7 +101,38 @@ export class SoundManager {
     osc.stop(t + 0.05);
   }
 
-  _playSoftTick(speedRatio) {
+  _playCardTick(speedRatio) {
+    const t = this.audioContext.currentTime;
+    const osc = this.audioContext.createOscillator();
+    const gainNode = this.audioContext.createGain();
+    const filter = this.audioContext.createBiquadFilter();
+
+    osc.connect(filter);
+    filter.connect(gainNode);
+    gainNode.connect(this.audioContext.destination);
+
+    // 鋸齒波模擬卡片/紙張的摩擦聲
+    osc.type = 'sawtooth';
+
+    // 高通濾波讓聲音更薄更脆
+    filter.type = 'highpass';
+    filter.frequency.value = 800;
+
+    // 音調較高
+    const freq = 600 + (speedRatio * 400);
+    osc.frequency.setValueAtTime(freq, t);
+    // 快速下滑模擬撥動
+    osc.frequency.exponentialRampToValueAtTime(100, t + 0.05);
+
+    const volume = 0.08 + (speedRatio * 0.05);
+    gainNode.gain.setValueAtTime(volume, t);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, t + 0.03); // 非常短促
+
+    osc.start(t);
+    osc.stop(t + 0.05);
+  }
+
+  _playElectronicTick(speedRatio) {
     const t = this.audioContext.currentTime;
     const osc = this.audioContext.createOscillator();
     const gainNode = this.audioContext.createGain();
@@ -102,15 +140,15 @@ export class SoundManager {
     osc.connect(gainNode);
     gainNode.connect(this.audioContext.destination);
 
-    // 簡單的清脆音 (遊戲感)
-    osc.type = 'triangle';
+    // 正弦波產生純淨的電子音
+    osc.type = 'sine';
 
-    // 較高頻率的短音
-    const freq = 800 + (speedRatio * 600);
+    // 較高的電子音調
+    const freq = 1200 + (speedRatio * 800);
     osc.frequency.setValueAtTime(freq, t);
 
-    // 非常短促的包絡
-    gainNode.gain.setValueAtTime(0.05, t); // 音量稍小
+    const volume = 0.05 + (speedRatio * 0.05);
+    gainNode.gain.setValueAtTime(volume, t);
     gainNode.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
 
     osc.start(t);
