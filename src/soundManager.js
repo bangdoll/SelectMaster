@@ -3,6 +3,7 @@ export class SoundManager {
     this.audioContext = null;
     this.isMuted = false;
     this.initialized = false;
+    this.soundType = 'mechanical'; // mechanical | soft
   }
 
   /**
@@ -29,17 +30,34 @@ export class SoundManager {
   }
 
   /**
+   * 設定音效類型
+   * @param {string} type - 'mechanical' | 'soft'
+   */
+  setSoundType(type) {
+    if (['mechanical', 'soft'].includes(type)) {
+      this.soundType = type;
+    }
+  }
+
+  /**
    * 播放滴答聲 (轉動時)
    * @param {number} speedRatio - 當前速度比例 (0~1)，用於調整音調
    */
   playTick(speedRatio = 0.5) {
     if (this.isMuted || !this.audioContext) return;
 
-    // 確保 AudioContext 在運行中
     if (this.audioContext.state === 'suspended') {
       this.audioContext.resume();
     }
 
+    if (this.soundType === 'mechanical') {
+      this._playMechanicalTick(speedRatio);
+    } else {
+      this._playSoftTick(speedRatio);
+    }
+  }
+
+  _playMechanicalTick(speedRatio) {
     const t = this.audioContext.currentTime;
     const osc = this.audioContext.createOscillator();
     const gainNode = this.audioContext.createGain();
@@ -74,6 +92,29 @@ export class SoundManager {
 
     osc.start(t);
     osc.stop(t + 0.05);
+  }
+
+  _playSoftTick(speedRatio) {
+    const t = this.audioContext.currentTime;
+    const osc = this.audioContext.createOscillator();
+    const gainNode = this.audioContext.createGain();
+
+    osc.connect(gainNode);
+    gainNode.connect(this.audioContext.destination);
+
+    // 簡單的清脆音 (遊戲感)
+    osc.type = 'triangle';
+
+    // 較高頻率的短音
+    const freq = 800 + (speedRatio * 600);
+    osc.frequency.setValueAtTime(freq, t);
+
+    // 非常短促的包絡
+    gainNode.gain.setValueAtTime(0.05, t); // 音量稍小
+    gainNode.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+
+    osc.start(t);
+    osc.stop(t + 0.06);
   }
 
   /**

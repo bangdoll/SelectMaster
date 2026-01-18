@@ -45,6 +45,31 @@ document.addEventListener('DOMContentLoaded', () => {
         roulette.spin();
     });
 
+    // 監聽此音效切換按鈕
+    const soundTypeBtn = document.getElementById('sound-type-btn');
+    soundTypeBtn.addEventListener('click', () => {
+        // 切換音效類型
+        const currentType = soundManager.soundType;
+        const newType = currentType === 'mechanical' ? 'soft' : 'mechanical';
+
+        soundManager.setSoundType(newType);
+
+        // 更新按鈕外觀
+        if (newType === 'mechanical') {
+            soundTypeBtn.textContent = '🎵';
+            soundTypeBtn.title = '切換音效 (機械聲)';
+            soundTypeBtn.setAttribute('aria-label', '目前：機械聲');
+        } else {
+            soundTypeBtn.textContent = '🎮';
+            soundTypeBtn.title = '切換音效 (清脆聲)';
+            soundTypeBtn.setAttribute('aria-label', '目前：清脆聲');
+        }
+
+        // 播放短暫測試音
+        soundManager.init();
+        soundManager.playTick(0.8);
+    });
+
     // 監聽靜音按鈕
     muteBtn.addEventListener('click', () => {
         const isMuted = soundManager.toggleMute();
