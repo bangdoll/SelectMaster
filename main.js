@@ -94,10 +94,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const winner = winnerNameEl.textContent;
         const currentNames = namesInput.value.split('\n');
 
-        // 過濾掉中獎者 (只刪除一個匹配項，避免刪除同名)
-        // 這裡假設刪除所有匹配項，或者只刪除第一個。
-        // 為了簡單直觀，我們過濾掉所有完全匹配的行
-        const newNames = currentNames.filter(name => name.trim() !== winner);
+        // 只刪除一個匹配項，避免刪除同名
+        const trimmedWinner = winner.trim();
+        const index = currentNames.findIndex(name => name.trim() === trimmedWinner);
+        if (index !== -1) {
+            currentNames.splice(index, 1);
+        }
+        const newNames = currentNames;
 
         namesInput.value = newNames.join('\n');
         roulette.setItems(newNames);
